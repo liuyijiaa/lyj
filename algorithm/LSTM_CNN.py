@@ -7,7 +7,6 @@ from torch.utils.data import DataLoader, Dataset
 from sklearn.metrics import f1_score, roc_auc_score
 from sklearn.preprocessing import StandardScaler
 
-# 自定义 Dataset，避免一次性创建巨型 3D 张量
 class TS_Dataset(Dataset):
     def __init__(self, data, labels, window_size):
         self.data = torch.tensor(data, dtype=torch.float32)
@@ -54,7 +53,7 @@ def run_lstm_cnn(csv_path):
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X_raw)
     
-    # 原文推荐窗口大小为 10
+
     window_size = 30
     batch_size = 512 # 小批量处理，防止 OOM
     
@@ -105,7 +104,7 @@ def run_lstm_cnn(csv_path):
 
 run_lstm_cnn('data/cardio.csv')
 
-# --- 在 LSTM_CNN.py 末尾添加 ---
+
 def run_lstm_cnn_detector(data, labels, config):
     """
     适配可视化框架的 LSTM-CNN 接口
@@ -143,11 +142,10 @@ def run_lstm_cnn_detector(data, labels, config):
     with torch.no_grad():
         for batch_x, _ in eval_loader:
             preds = model(batch_x)
-            # 计算重构/预测误差作为异常得分
             batch_scores = torch.mean((preds - batch_x[:, -1, :])**2, dim=1)
             scores.extend(batch_scores.numpy())
     
-    # 关键：补齐因滑动窗口缺失的前 window_size 个数据点的评分，确保长度一致
+
     full_scores = np.zeros(len(data))
     full_scores[window_size:] = np.array(scores)
     return full_scores
