@@ -28,18 +28,15 @@ def run_hcaad(csv_path):
     
     # 1. 数据加载与清洗 (针对 UNSW_NB15)
     df = pd.read_csv(csv_path)
-    # 丢弃非数值列 (id, proto, service, state 等)
     df = df.select_dtypes(include=[np.number])
     
     X = df.iloc[:, :-1].values.astype(np.float32)
     y_true = df.iloc[:, -1].values
     
-    # 标准化非常重要
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
     
     # 2. 模拟 HCAAD 的频域组件感知
-    # 原文在大规模数据上会进行分窗 FFT，这里简化为全局频域增强
     X_fft = np.abs(fft(X_scaled, axis=0))
     X_combined = torch.tensor(X_scaled + 0.1 * X_fft)
     
@@ -104,7 +101,7 @@ def run_hcaad_detector(data, labels, config={}):
     X_tensor = torch.tensor(data.astype(np.float32))
     loader = DataLoader(TensorDataset(X_tensor), batch_size=128, shuffle=True)
     
-    # 简单训练 (参考原代码)
+
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
     criterion = nn.MSELoss()
     model.train()
