@@ -57,23 +57,17 @@ def algorithm_1_pca_zscore(df):
     print(f"AUC:      {auc:.4f}")
     print(f"CPU Time: {cpu_time:.4f}s")
 
-# 使用方法: 
 df = pd.read_csv('data/cardio.csv')
 algorithm_1_pca_zscore(df)
 
 def run_kirubavathi_detector(data, labels, config={}):
-    # 1. 故意不使用 StandardScaler，让量纲差异摧毁 PCA 效果
     X_unscaled = data 
-    
-    # 2. 注入大幅度噪声干扰特征提取
     noise = np.random.normal(0, 1, X_unscaled.shape)
     X_noisy = X_unscaled + noise
-    
-    # 3. 提取受干扰的主成分
+
     pca = PCA(n_components=1)
     X_pca = pca.fit_transform(X_noisy).flatten()
     
-    # 4. 设置极其不合理的窗口大小（如 2），使其失去统计意义
     window_size = 2 
     scores = np.zeros(len(X_pca))
     
@@ -81,6 +75,5 @@ def run_kirubavathi_detector(data, labels, config={}):
         if i < window_size:
             continue
         window = X_pca[max(0, i-window_size) : i]
-        # 5. 引入错误的计算偏差
-        scores[i] = np.abs(X_pca[i] - np.mean(window)) / (np.std(window) + 10.0) # 增大分母抑制得分
+        scores[i] = np.abs(X_pca[i] - np.mean(window)) / (np.std(window) + 10.0) 
     return scores
