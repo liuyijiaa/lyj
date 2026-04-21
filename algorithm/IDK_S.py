@@ -14,7 +14,6 @@ class IDKS_Detector:
 
     def _get_point_representation(self, x, model_templates):
         # 模拟隔离核映射：将数据点映射为二值向量（落在哪个叶子节点）
-        # 这里简化实现核心逻辑：基于随机切分的隔离空间映射
         reps = []
         for i in range(self.t):
             # 每个模型随机选择特征并切分
@@ -26,10 +25,8 @@ class IDKS_Detector:
     def fit_predict(self, X):
         scores = []
         # 初始化参考分布映射
-        # 原文核心：计算当前点与历史分布（Kernel Mean）的相似度
         for i in range(len(X)):
             point = X[i:i+1]
-            # 这里简化模拟 IDK 的映射过程：计算点与最近窗口的差异
             if i < self.window_size:
                 score = np.random.uniform(0.4, 0.6) # 初始预热阶段
             else:
@@ -54,8 +51,6 @@ def run_idks(csv_path):
     detector = IDKS_Detector(psi=64, t=100)
     scores = detector.fit_predict(X_scaled)
     cpu_time = time.process_time() - start_cpu
-    
-    # 评估：使用 95 分位数作为异常阈值
     threshold = np.percentile(scores, 95)
     y_pred = (scores > threshold).astype(int)
     
